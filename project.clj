@@ -5,6 +5,7 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.1"]
   [org.clojure/math.combinatorics "0.1.6"]
+  [org.clojure/tools.trace "0.7.10"]
   [clojure-lanterna "0.9.7"]]
   :main ^:skip-aot clojure-conway-game-of-life.core
   :target-path "target/%s"

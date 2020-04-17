@@ -69,9 +69,9 @@
       (fn [[i j]]
         (and 
           (>= i 0)
-          (<= i (dec (count (first arr))))
+          (< i (count arr))
           (>= j 0)
-          (<= j (dec (count arr)))))
+          (< j (count (first arr)))))
       adjpoints)))
 
 (defn fetch-adjacent-cells-count
@@ -90,16 +90,16 @@
     (cond
       (and (on? cell-val) (< adj-sum 2)) offsymb
       (and (on? cell-val) (> adj-sum 3)) offsymb
-      (and (on? cell-val) (and (> adj-sum 1) (< adj-sum 4))) cell-val
+      (and (on? cell-val) (and (> adj-sum 1) (< adj-sum 4))) onsymb
       (and (off? cell-val) (= adj-sum 3)) onsymb
       :else cell-val)))
 
 (defn full-update
   [arr]
-  (let [w (count (first arr))
-        h (count arr)]
+  (let [w (count arr)
+        h (count (first arr))]
     (partition 
-      w
+      h
       (mapv 
         (fn [[x y]]
           (update-cell arr x y))
@@ -116,47 +116,25 @@
   [arr times]
   (let [scr (s/get-screen :swing)]
     (s/in-screen scr
-      (loop [a arr t times]
+      (loop [a arr t times prev-a []]
         (s/clear scr)
         (doseq [[line i] (map vector a (range (count a)))]
           (s/put-string scr 0 i (concat-cells line) {:fg :green}))
         (s/redraw scr)
-        (time (Thread/sleep 300))
+        (time (Thread/sleep 100))
         (if 
-          (= t 0) a 
-          (recur (vec (map vec (full-update a))) (dec t)))))
+          (or (= t 0) (= a prev-a)) a 
+          (recur (vec (map vec (full-update a))) (dec t) a))))
         ))
 
 (defn -main
+  "partition x repeatedly y
+  where x = number of terminal UI columns, (y/w) is the # of rows"
   [& args]
   (def arr
-    [
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;1
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;2
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,onsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;3
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;4
-      [offsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;5
-      [offsymb,offsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;6
-      [onsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;7
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;8
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;9
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;10
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;11
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;12
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;13
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;14
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;15
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;16
-      [offsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;17
-      [offsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;18
-      [offsymb,offsymb,offsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;19
-      [offsymb,offsymb,offsymb,onsymb,onsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;20
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;21
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;22
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;23
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;24
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;25
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;26
-      [offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb,offsymb];;27
-    ])
+    (vec 
+      (map vec 
+        (partition 80 
+          (vec 
+            (repeatedly 1920 #(rand-nth [onsymb offsymb])))))))
   (do-update-times arr 100))
