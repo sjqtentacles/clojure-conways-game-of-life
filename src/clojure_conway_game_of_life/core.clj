@@ -96,8 +96,7 @@
 
 (defn full-update
   [arr]
-  (let [w (count arr)
-        h (count (first arr))]
+  (let [w (count arr) h (count (first arr))]
     (partition 
       h
       (mapv 
@@ -124,20 +123,16 @@
         ;;(time (Thread/sleep 100))
         (if 
           (or (= t 0) (= a prev-a)) a 
-          (recur (vec (map vec (full-update a))) (dec t) a))))
-        ))
+          (recur (vec (map vec (full-update a))) (dec t) a))))))
 
 (defn read-seed-from-file
-  [fname off]
+  [fname]
   (as-> (slurp fname) s
-    (clojure.string/replace s "." off)
+    (clojure.string/replace s "." offsymb)
     (clojure.string/split-lines s)
-    (mapv
-      (fn [x]
-        (clojure.string/split x #""))
-      s)))
+    (mapv (fn [x] (clojure.string/split x #"")) s)))
 
 (defn -main
   [& args]
-  (let [arr (read-seed-from-file "glider.txt" offsymb)]
+  (let [arr (read-seed-from-file "glider.txt")]
     (do-update-times arr 600)))
