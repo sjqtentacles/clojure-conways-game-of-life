@@ -121,20 +121,23 @@
         (doseq [[line i] (map vector a (range (count a)))]
           (s/put-string scr 0 i (concat-cells line) {:fg :green}))
         (s/redraw scr)
-        (time (Thread/sleep 100))
+        ;;(time (Thread/sleep 100))
         (if 
           (or (= t 0) (= a prev-a)) a 
           (recur (vec (map vec (full-update a))) (dec t) a))))
         ))
 
+(defn read-seed-from-file
+  [fname off]
+  (as-> (slurp fname) s
+    (clojure.string/replace s "." off)
+    (clojure.string/split-lines s)
+    (mapv
+      (fn [x]
+        (clojure.string/split x #""))
+      s)))
+
 (defn -main
-  "partition x repeatedly y
-  where x = number of terminal UI columns, (y/w) is the # of rows"
   [& args]
-  (def arr
-    (vec 
-      (map vec 
-        (partition 80 
-          (vec 
-            (repeatedly 1920 #(rand-nth [onsymb offsymb])))))))
-  (do-update-times arr 100))
+  (let [arr (read-seed-from-file "glider.txt" offsymb)]
+    (do-update-times arr 600)))
